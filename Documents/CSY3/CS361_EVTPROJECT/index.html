@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EVT - Passenger Detected</title>
+  <link rel="stylesheet" href="../CS361_EVTPROJECT/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>EVT - Passenger Detected</h1>
+    <div class="cam-status">CAM OFF</div>
+  </header>
+
+  <div class="dashboard">
+    <h2>Dashboard</h2>
+
+    <!-- Cards -->
+    <div class="cards">
+      <div class="card" id="card-current">
+        <h3>👤 Current Passenger</h3>
+        <div class="value" id="current-count">0</div>
+        <small><div class="Real-time" id="current-time">(00:00:00)</div></small>
+      </div>
+
+      <div class="card" id="card-peak">
+        <h3>↗️ Peak Today</h3>
+        <div class="value" id="peak-today">0</div>
+      </div>
+
+      <div class="card" id="card-total">
+        <h3>📶 Total Passenger</h3>
+        <div class="value" id="total-passenger">0</div>
+      </div>
+
+      <div class="card" id="card-bus">
+        <h3>🚍 Bus Number</h3>
+        <div class="value" id="bus-number">0</div>
+        <h3 style="margin-top:12px;">🚍 Bus Line</h3>
+        <div class="value" id="bus-line">0</div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="carcontainer">
+      <div class="calendar-box">
+        <label><strong>🗓️ Calender</strong></label>
+        <form>
+          <input type="date" id="date" name="date" placeholder="DD/MM/YYYY 🔽">
+        </form>
+      </div>
+    </div>
+
+    <!-- Graphs -->
+    <div class="graphs">
+      <div class="graph">
+        <h4>Daily ⏰</h4>
+        <div class="placeholder">[Daily Graph]</div>
+      </div>
+
+      <div class="small-graphs">
+        <div class="graph">
+          <h4>Weekly 📊</h4>
+          <div class="placeholder">[Weekly Graph]</div>
+        </div>
+        <div class="graph">
+          <h4>Monthly 📈</h4>
+          <div class="placeholder">[Monthly Graph]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="../CS361_EVTPROJECT/js/javascript.js"></script>
+</body>
+</html>

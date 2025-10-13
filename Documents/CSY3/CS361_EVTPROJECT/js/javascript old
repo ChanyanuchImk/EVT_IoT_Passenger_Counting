@@ -1,0 +1,27 @@
+// script.js
+
+// เลือก element ที่จะแก้ไข
+const currentPassengerEl = document.querySelector(".cards .card .value");
+const realTimeEl = document.querySelector(".Real-time");
+
+// ฟังก์ชันอัปเดตจำนวน + เวลา
+function updateDashboard(newValue) {
+  // ใส่ animation เวลาอัปเดตค่า
+  currentPassengerEl.classList.add("pulse");
+  setTimeout(() => currentPassengerEl.classList.remove("pulse"), 500);
+
+  // อัปเดตตัวเลข
+  currentPassengerEl.textContent = newValue;
+
+  // อัปเดตเวลา
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString();
+  realTimeEl.textContent = `(${timeStr})`;
+}
+
+// ❗ ตัวอย่างจำลอง Raspberry Pi ส่งข้อมูลมา
+// สมมติทุก 5 วินาทีจะมีข้อมูลใหม่
+setInterval(() => {
+  const randomPassenger = Math.floor(Math.random() * 20); // จำลองจำนวนผู้โดยสาร
+  updateDashboard(randomPassenger);
+}, 5000);
