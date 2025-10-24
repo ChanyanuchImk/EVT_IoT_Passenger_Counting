@@ -6,42 +6,42 @@ import { WebSocketServer } from "ws";
 const app = express();
 const server = http.createServer(app);
 
-// --- WebSocket #1 สำหรับ Dashboard ---
+// --- WebSocket สำหรับ Dashboard (port 8080) ---
 const dashboardWSS = new WebSocketServer({ server });
 
-// --- WebSocket #2 สำหรับ Python Camera (แยกพอร์ต) ---
+// --- WebSocket สำหรับ Python Camera (port 8081) ---
 const cameraWSS = new WebSocketServer({ port: 8081 });
 
-// ------------------- Express serve -------------------
-app.use(express.static("."));
+// ------------------- Serve Static Files -------------------
+app.use(express.static(".")); // เสิร์ฟ index-2.html และ javascript.js
 server.listen(8080, () => {
-  console.log("🚀 Dashboard server running at http://localhost:8080");
+  console.log("Dashboard server running at http://localhost:8080");
 });
 
-// เมื่อ dashboard เชื่อม
+// ------------------- Dashboard WS -------------------
 dashboardWSS.on("connection", (ws, req) => {
-  console.log("🖥️ Dashboard connected:", req.socket.remoteAddress);
+  console.log("Dashboard connected:", req.socket.remoteAddress);
 });
 
-// เมื่อ YOLO Python เชื่อม
+// ------------------- Camera WS -------------------
 cameraWSS.on("connection", (ws, req) => {
-  console.log("📸 Camera connected:", req.socket.remoteAddress);
+  console.log("Camera connected:", req.socket.remoteAddress);
 
   ws.on("message", (msg) => {
     try {
       const data = JSON.parse(msg);
-      console.log("👥 Data received:", data);
+      console.log("Data received:", data);
 
-      // broadcast ไปยัง dashboard ทุกตัว
+      // ส่งต่อข้อมูลไปยัง Dashboard ทุกตัว
       dashboardWSS.clients.forEach((client) => {
         if (client.readyState === 1) {
           client.send(JSON.stringify(data));
         }
       });
     } catch (e) {
-      console.error("❌ JSON parse error", e);
+      console.error("JSON parse error", e);
     }
   });
 
-  ws.on("close", () => console.log("📸 Camera disconnected"));
+  ws.on("close", () => console.log("Camera disconnected"));
 });

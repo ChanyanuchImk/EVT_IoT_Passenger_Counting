@@ -1,5 +1,4 @@
-/* script.js (แทนที่ไฟล์เดิมของคุณ) */
-/* -------------------- เลือก element ที่จะอัปเดต -------------------- */
+/* -------------------- Element selectors -------------------- */
 const els = {
   currentCount: document.getElementById('current-count'),
   currentTime: document.getElementById('current-time'),
@@ -9,10 +8,9 @@ const els = {
   busLine: document.getElementById('bus-line')
 };
 
-/* -------------------- เก็บค่าเก่าไว้เปรียบเทียบ -------------------- */
 const last = { current: null, peak: null, total: null, busNumber: null, busLine: null };
 
-/* -------------------- ฟังก์ชันช่วยเหลือ -------------------- */
+/* -------------------- Utility functions -------------------- */
 function formatTime(date = new Date()) { return date.toLocaleTimeString(); }
 
 function setValueIfChanged(el, newValue, lastValue, opts = {}) {
@@ -40,17 +38,13 @@ function setValueIfChanged(el, newValue, lastValue, opts = {}) {
   return true;
 }
 
-/* -------------------- อัปเดตข้อมูลที่เข้ามา -------------------- */
-/* expected data:
-   { current:number, peak:number, total:number, busNumber:string|number, busLine:string } */
+/* -------------------- Data handler -------------------- */
 function handleIncomingData(data = {}) {
-  // current: เปลี่ยนได้ตามจริง
   if ('current' in data) {
     const changed = setValueIfChanged(els.currentCount, data.current, last.current, { updateTimeOnChange: true });
     if (changed) last.current = data.current;
   }
 
-  // peak: อัปเดตเฉพาะเมื่อ "มากกว่าเดิม" เท่านั้น  ✅
   if ('peak' in data) {
     const newPeak = Number(data.peak);
     const oldPeak = Number(last.peak ?? 0);
@@ -60,12 +54,10 @@ function handleIncomingData(data = {}) {
     }
   }
 
-  // total: อัปเดตเมื่อ "เพิ่มหรือเท่าเดิม" ✅
   if ('total' in data) {
-  const changed = setValueIfChanged(els.totalPassenger, data.total, last.total);
+    const changed = setValueIfChanged(els.totalPassenger, data.total, last.total);
     if (changed) last.total = data.total;
   }
-
 
   if ('busNumber' in data) {
     const changed = setValueIfChanged(els.busNumber, data.busNumber, last.busNumber);
@@ -78,13 +70,12 @@ function handleIncomingData(data = {}) {
   }
 }
 
-/* -------------------- WebSocket: ใช้ host/port ตามหน้าที่กำลังเปิด -------------------- */
-// ถ้าเปิดหน้า http://localhost:8080/index-2.html ก็จะต่อ ws://localhost:8080 อัตโนมัติ
+/* -------------------- WebSocket connection -------------------- */
 (function connectWS() {
   const wsUrl = `ws://${location.hostname}:${location.port || 80}`;
   const ws = new WebSocket(wsUrl);
 
-  ws.addEventListener('open', () => console.log('WS connected:', wsUrl));
+  ws.addEventListener('open', () => console.log('🖥️ WS connected:', wsUrl));
   ws.addEventListener('message', (ev) => {
     try {
       const data = JSON.parse(ev.data);
