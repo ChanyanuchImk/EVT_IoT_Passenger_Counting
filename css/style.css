@@ -20,13 +20,25 @@ body {
   }
   
   .cam-status {
-    background: #4AB055;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 5px;
+    padding: 6px 12px;
+    border-radius: 6px;
     font-weight: bold;
-    font-size: 14px;
+    display: inline-block;
+    color: white; /* ตัวอักษรเป็นขาว */
   }
+  
+  .cam-connected {
+    background-color: green;
+  }
+  
+  .cam-disconnected {
+    background-color: red;
+  }
+  
+  .cam-error {
+    background-color: orange;
+  }
+  
   
   /* Dashboard container */
   .dashboard {

@@ -20,14 +20,19 @@ print("YOLOv8n starting... Press 'q' to quit")
 peak = 0
 total = 0
 current = 0
-tracks = {}   # {id: last_zone}
-zone_split = 0.5   # ครึ่งจอ: <0.5 = Zone A, >=0.5 = Zone B
+tracks = {}           # {id: last_zone}
+zone_split = 0.5      # ครึ่งจอ: <0.5 = Zone A, >=0.5 = Zone B
 
 try:
     while True:
         ok, frame = cap.read()
+
+        # -------------------- ตรวจสอบสถานะกล้อง --------------------
         if not ok:
-            break
+            camera_status = "disconnected"
+            frame = np.zeros((480, 640, 3), dtype=np.uint8)  # frame ว่างกรณี disconnect
+        else:
+            camera_status = "connected"
 
         h, w, _ = frame.shape
         mid_x = int(w * zone_split)
@@ -73,18 +78,19 @@ try:
         if current > peak:
             peak = current
 
+        # -------------------- ส่ง payload พร้อมสถานะกล้อง --------------------
         payload = {
             "current": current,
             "peak": peak,
             "total": total,
             "busLine": BUS_LINE,
-            "busNumber": BUS_NUMBER
+            "busNumber": BUS_NUMBER,
         }
         ws.send(json.dumps(payload))
 
         # แสดงภาพ
-        cv2.putText(frame, f"Cur:{current}  Peak:{peak}  Total:{total}",
-                    (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+        cv2.putText(frame, f"Cur:{current}  Peak:{peak}  Total:{total}  Camera:{camera_status}",
+                    (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0) if camera_status=="connected" else (0,0,255), 2)
         cv2.imshow("YOLOv8n Zone Tracking", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):

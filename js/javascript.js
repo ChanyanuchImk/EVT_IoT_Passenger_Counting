@@ -10,6 +10,26 @@ const els = {
 
 const last = { current: null, peak: null, total: null, busNumber: null, busLine: null };
 
+/* -------------------- เช็คสถานะการเชื่อมต่อกล้อง -------------------- */
+const camStatusEl = document.getElementById('cam-status');
+
+const ws = new WebSocket('ws://localhost:8081');
+
+ws.onopen = () => {
+  camStatusEl.textContent = "CAM ● Connected";
+  camStatusEl.className = "cam-status cam-connected"; // เปลี่ยนพื้นหลังเป็นสีเขียว
+};
+
+ws.onclose = () => {
+  camStatusEl.textContent = "CAM ● Disconnected";
+  camStatusEl.className = "cam-status cam-disconnected"; // เปลี่ยนพื้นหลังเป็นสีแดง
+};
+
+ws.onerror = (err) => {
+  camStatusEl.textContent = "CAM ● Error";
+  camStatusEl.className = "cam-status cam-error"; // เปลี่ยนพื้นหลังเป็นสีส้ม
+};
+
 /* -------------------- Utility functions -------------------- */
 function formatTime(date = new Date()) { return date.toLocaleTimeString(); }
 
