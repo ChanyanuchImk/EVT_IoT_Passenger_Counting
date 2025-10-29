@@ -1,0 +1,35 @@
+import boto3
+import base64
+import json
+import uuid
+
+bucket_name = "datasetevtproject"  # แก้เป็น bucket ของคุณ
+folder_name = "IoTFeed/"
+s3 = boto3.client("s3")
+
+def lambda_handler(event, context):
+    try:
+        body = json.loads(event['body'])
+        images = body.get("images", [])  # list ของ base64 images
+        uploaded_files = []
+
+        for img_b64 in images:
+            img_bytes = base64.b64decode(img_b64)
+            filename = f"{folder_name}snapshot_{uuid.uuid4()}.jpg"  # ใส่ prefix folder
+            print(f"Uploading to bucket: {bucket_name}, key: {filename}")
+            s3.put_object(Bucket=bucket_name, Key=filename, Body=img_bytes)
+            uploaded_files.append(filename)
+
+        return {
+            "statusCode": 200,
+            "body": json.dumps({
+                "message": f"Uploaded {len(uploaded_files)} files",
+                "files": uploaded_files
+            })
+        }
+
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)})
+        }
