@@ -1,0 +1,78 @@
+import boto3, requests, base64, os
+
+s3 = boto3.client("s3")
+
+def upload_split_to_roboflow(bucket, dataset_name, api_key, split_name):
+
+    img_prefix = f"{dataset_name}/{split_name}/images/"
+    lbl_prefix = f"{dataset_name}/{split_name}/labels/"
+
+    upload_url = f"https://api.roboflow.com/dataset/{dataset_name}/upload?api_key={api_key}"
+
+    # list image files
+    resp = s3.list_objects_v2(Bucket=bucket, Prefix=img_prefix)
+    if "Contents" not in resp:
+        print(f"🚫 No images found under {img_prefix}")
+        return
+
+    for obj in resp["Contents"]:
+        img_key = obj["Key"]
+        if not img_key.lower().endswith(".jpg"):
+            continue
+
+        img_name = os.path.basename(img_key)
+        label_key = lbl_prefix + img_name.replace(".jpg", ".txt")
+
+        # โหลดภาพจาก S3
+        img_bytes = s3.get_object(Bucket=bucket, Key=img_key)["Body"].read()
+
+        # โหลด label (YOLO txt)
+        try:
+            lbl_bytes = s3.get_object(Bucket=bucket, Key=label_key)["Body"].read()
+            lbl_text = lbl_bytes.decode("utf-8")
+        except Exception as e:
+            print(f"⚠️ No label for {img_name}, skipping label")
+            lbl_text = None
+
+        # เข้ารหัสภาพ base64
+        img_b64 = base64.b64encode(img_bytes).decode("utf-8")
+
+        # เตรียม data payload
+        payload = {
+            "name": img_name,
+            "split": split_name,       # บอกว่า train/test/valid
+            "image": img_b64
+        }
+
+        if lbl_text:
+            payload["annotation"] = lbl_text
+
+        print(f"📤 Uploading {split_name}/{img_name} → {dataset_name}")
+        r = requests.post(
+            upload_url,
+            data=payload,
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
+        print(f"📦 {r.status_code}: {r.text}")
+
+def lambda_handler(event, context):
+    bucket = os.environ["S3_BUCKET"]
+    api_key = os.environ["ROBOFLOW_API_KEY"]
+
+    # 2 datasets ใน workspace เดียวกัน
+    dataset1 = "EVT-Dataset-1"
+    dataset2 = "EVT-Dataset-2"
+
+    # 3 splits
+    splits = ["train", "valid", "test"]
+
+    # Upload dataset_1
+    for split in splits:
+        upload_split_to_roboflow(bucket, f"dataset_1/{split}", api_key, split)
+
+    # Upload dataset_2
+    for split in splits:
+        upload_split_to_roboflow(bucket, f"dataset_2/{split}", api_key, split)
+
+    return {"statusCode": 200, "body": "✅ All datasets uploaded successfully!"}
+
